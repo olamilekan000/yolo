@@ -1,1 +1,867 @@
-<h1>YOLOOOOOOO!</>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YOLO — You Only Live Once</title>
+  <meta name="description" content="An ultra-vibrant, interactive, and colorful celebration of living life to the fullest." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Space+Grotesk:wght@500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-base: #06060c;
+      --color-1: #ff007a;
+      --color-2: #7928ca;
+      --color-3: #00f0ff;
+      --color-4: #ffb800;
+      --color-5: #00ff66;
+      --glow-intensity: 0.8;
+      --font-display: 'Syne', sans-serif;
+      --font-title: 'Outfit', sans-serif;
+      --font-mono: 'Space Grotesk', monospace;
+    }
+
+    /* Color Themes */
+    [data-theme="rainbow"] {
+      --color-1: #ff0055;
+      --color-2: #7a00ff;
+      --color-3: #00e5ff;
+      --color-4: #ffbe0b;
+      --color-5: #00ff88;
+    }
+    [data-theme="cyberpunk"] {
+      --color-1: #ff007f;
+      --color-2: #ffe600;
+      --color-3: #00f0ff;
+      --color-4: #7000ff;
+      --color-5: #ff3300;
+    }
+    [data-theme="sunset"] {
+      --color-1: #ff3366;
+      --color-2: #ff6b35;
+      --color-3: #f7c59f;
+      --color-4: #9b5de5;
+      --color-5: #f15bb5;
+    }
+    [data-theme="aurora"] {
+      --color-1: #00ff87;
+      --color-2: #60efff;
+      --color-3: #0061ff;
+      --color-4: #a855f7;
+      --color-5: #ec4899;
+    }
+    [data-theme="electric"] {
+      --color-1: #fa709a;
+      --color-2: #fee140;
+      --color-3: #30cfd0;
+      --color-4: #330867;
+      --color-5: #a18cd1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: #ffffff;
+      font-family: var(--font-title);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background 0.6s ease;
+    }
+
+    /* Ambient Background Mesh */
+    .mesh-glow {
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 20%, var(--color-1), transparent 45%),
+                  radial-gradient(circle at 70% 60%, var(--color-2), transparent 40%),
+                  radial-gradient(circle at 40% 80%, var(--color-3), transparent 35%),
+                  radial-gradient(circle at 80% 20%, var(--color-4), transparent 40%);
+      opacity: 0.35;
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+      animation: rotateMesh 30s linear infinite alternate;
+      will-change: transform;
+    }
+
+    @keyframes rotateMesh {
+      0% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.15) rotate(180deg); }
+      100% { transform: scale(1) rotate(360deg); }
+    }
+
+    /* Canvas for interactive particle bursts */
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Main Container */
+    .app-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1100px;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+      text-align: center;
+    }
+
+    /* Top Controls Bar */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .theme-pill {
+      background: transparent;
+      border: 1px solid transparent;
+      color: rgba(255, 255, 255, 0.7);
+      padding: 0.4rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .theme-pill:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .theme-pill.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .theme-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* Hyper Mode Button */
+    .hyper-btn {
+      background: linear-gradient(135deg, var(--color-1), var(--color-3));
+      border: none;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      padding: 0.45rem 1.1rem;
+      border-radius: 9999px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px var(--color-1);
+    }
+    .hyper-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 30px var(--color-3);
+    }
+    .hyper-btn.active {
+      animation: pulseGlow 0.8s infinite alternate;
+      background: linear-gradient(135deg, var(--color-4), var(--color-1));
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 20px var(--color-4), 0 0 40px var(--color-1); }
+      to { box-shadow: 0 0 40px var(--color-1), 0 0 70px var(--color-3); }
+    }
+
+    /* Hero Section */
+    .hero {
+      perspective: 1000px;
+      margin-top: 1rem;
+    }
+
+    .hero-card {
+      position: relative;
+      background: rgba(20, 20, 35, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 3.5rem 3rem;
+      border-radius: 2.5rem;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(
+        transparent,
+        var(--color-1),
+        var(--color-2),
+        var(--color-3),
+        var(--color-4),
+        transparent 70%
+      );
+      opacity: 0.15;
+      animation: spinBorder 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes spinBorder {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Floating Badges */
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.35rem 0.8rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* YOLO Title */
+    .title-container {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    .yolo-title {
+      font-family: var(--font-display);
+      font-size: clamp(4.5rem, 15vw, 11rem);
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      background: linear-gradient(
+        135deg,
+        var(--color-1) 0%,
+        var(--color-2) 25%,
+        var(--color-3) 50%,
+        var(--color-4) 75%,
+        var(--color-5) 100%
+      );
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 6s ease-in-out infinite alternate;
+      filter: drop-shadow(0 0 35px rgba(255, 0, 128, 0.45));
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .title-container:hover .yolo-title {
+      transform: scale(1.04);
+      filter: drop-shadow(0 0 55px var(--color-3));
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Subtitle & Motto */
+    .subtext {
+      font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 1rem;
+      background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.7));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .quote-box {
+      margin-top: 1.8rem;
+      padding: 1.2rem 1.8rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 1.2rem;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      font-size: 1.05rem;
+      color: rgba(255, 255, 255, 0.85);
+      min-height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .quote-text {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      font-style: italic;
+    }
+
+    /* Interactive Actions Row */
+    .action-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 2rem;
+    }
+
+    .action-btn {
+      position: relative;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 0.9rem 1.8rem;
+      border-radius: 1.2rem;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--color-1), var(--color-3));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    .action-btn:hover {
+      border-color: transparent;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px var(--color-1);
+    }
+
+    .action-btn:hover::before {
+      opacity: 1;
+    }
+
+    .action-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--color-1), var(--color-2));
+      border: none;
+      box-shadow: 0 10px 30px rgba(255, 0, 122, 0.35);
+    }
+    .primary-btn:hover {
+      box-shadow: 0 15px 40px rgba(255, 0, 122, 0.6);
+    }
+
+    /* Sound Visualizer Bars */
+    .sound-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+    }
+    .bar {
+      width: 3px;
+      height: 4px;
+      background: #fff;
+      border-radius: 3px;
+      transition: height 0.15s ease;
+    }
+    .playing .bar:nth-child(1) { animation: bounce 0.6s infinite alternate ease-in-out; }
+    .playing .bar:nth-child(2) { animation: bounce 0.4s 0.2s infinite alternate ease-in-out; }
+    .playing .bar:nth-child(3) { animation: bounce 0.7s 0.1s infinite alternate ease-in-out; }
+    .playing .bar:nth-child(4) { animation: bounce 0.5s 0.3s infinite alternate ease-in-out; }
+
+    @keyframes bounce {
+      from { height: 3px; }
+      to { height: 16px; }
+    }
+
+    /* Floating Pill stats / Fun feature cards */
+    .feature-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+      width: 100%;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      text-align: left;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.4;
+    }
+
+    /* Interactive hint */
+    .hint-text {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 0.05em;
+    }
+
+    .key-badge {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      margin: 0 0.2rem;
+    }
+
+    /* Shake animation for Hyper Mode */
+    .hyper-shake {
+      animation: gentleShake 0.15s infinite;
+    }
+    @keyframes gentleShake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      25% { transform: translate(-1px, -1px) rotate(-0.3deg); }
+      50% { transform: translate(-2px, 0px) rotate(0.3deg); }
+      75% { transform: translate(2px, 1px) rotate(0deg); }
+      100% { transform: translate(1px, -1px) rotate(0.2deg); }
+    }
+  </style>
+</head>
+<body data-theme="rainbow">
+  <div class="mesh-glow" id="mesh"></div>
+  <canvas id="particle-canvas"></canvas>
+
+  <main class="app-wrapper">
+    <!-- Top Theme & Controls Bar -->
+    <nav class="top-bar">
+      <button class="theme-pill active" data-set-theme="rainbow">
+        <span class="theme-dot" style="background: #ff0055;"></span> Rainbow
+      </button>
+      <button class="theme-pill" data-set-theme="cyberpunk">
+        <span class="theme-dot" style="background: #00f0ff;"></span> Cyberpunk
+      </button>
+      <button class="theme-pill" data-set-theme="sunset">
+        <span class="theme-dot" style="background: #ff6b35;"></span> Sunset
+      </button>
+      <button class="theme-pill" data-set-theme="aurora">
+        <span class="theme-dot" style="background: #00ff87;"></span> Aurora
+      </button>
+      <button class="theme-pill" data-set-theme="electric">
+        <span class="theme-dot" style="background: #fa709a;"></span> Electric
+      </button>
+      <button class="hyper-btn" id="hyper-toggle">⚡ Hyper Mode</button>
+    </nav>
+
+    <!-- 3D Glass Hero Section -->
+    <section class="hero">
+      <div class="hero-card" id="card">
+        <div class="badge-bar">
+          <span class="badge">✨ Maximum Vibrance</span>
+          <span class="badge">🚀 100% Energy</span>
+        </div>
+
+        <div class="title-container" id="title-wrapper">
+          <h1 class="yolo-title">YOLO</h1>
+        </div>
+
+        <h2 class="subtext">You Only Live Once</h2>
+
+        <div class="quote-box">
+          <p class="quote-text" id="quote">"Life is either a daring adventure or nothing at all."</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="action-grid">
+          <button class="action-btn primary-btn" id="blast-btn">
+            <span>🎉 Launch Confetti</span>
+          </button>
+          <button class="action-btn" id="vibe-btn">
+            <span>🎲 New YOLO Vibe</span>
+          </button>
+          <button class="action-btn" id="sound-btn">
+            <div class="sound-bars" id="sound-bars">
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+              <div class="bar"></div>
+            </div>
+            <span id="sound-label">🎵 Play Synth Chords</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fun Feature Grid -->
+    <div class="feature-row">
+      <div class="feature-card" onclick="triggerBurst(event)">
+        <div class="card-icon">⚡</div>
+        <h3 class="card-title">Pure Energy</h3>
+        <p class="card-desc">Click anywhere on the screen to trigger bursting neon fireworks and kinetic light trails.</p>
+      </div>
+
+      <div class="feature-card" onclick="switchRandomTheme()">
+        <div class="card-icon">🎨</div>
+        <h3 class="card-title">Dynamic Palettes</h3>
+        <p class="card-desc">Curated chromatic mesh gradients that react to motion, sound, and theme switches.</p>
+      </div>
+
+      <div class="feature-card" onclick="toggleAudio()">
+        <div class="card-icon">🔊</div>
+        <h3 class="card-title">Harmonic Sound</h3>
+        <p class="card-desc">Built-in Web Audio API generative chord player creating ambient vibes in real time.</p>
+      </div>
+    </div>
+
+    <p class="hint-text">
+      Pro Tip: Tap <span class="key-badge">Spacebar</span> or click anywhere to launch fireworks. Move your mouse to tilt the 3D card.
+    </p>
+  </main>
+
+  <script>
+    // --- Canvas Particle & Confetti System ---
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const colors = ['#ff0055', '#00f0ff', '#ffe600', '#7a00ff', '#00ff88', '#ff3366', '#ffffff'];
+
+    class Particle {
+      constructor(x, y, isExplosion = false) {
+        this.x = x;
+        this.y = y;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.radius = isExplosion ? Math.random() * 5 + 2 : Math.random() * 3 + 1;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = isExplosion ? Math.random() * 9 + 2 : Math.random() * 1.5 + 0.3;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.alpha = 1;
+        this.decay = isExplosion ? Math.random() * 0.02 + 0.012 : Math.random() * 0.005 + 0.002;
+        this.gravity = isExplosion ? 0.12 : -0.02;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = Math.max(this.alpha, 0);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function createExplosion(x, y, count = 40) {
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(x, y, true));
+      }
+    }
+
+    // Ambient floating sparks
+    function spawnAmbient() {
+      if (particles.length < (hyperMode ? 180 : 80)) {
+        particles.push(new Particle(Math.random() * width, height + 10, false));
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, width, height);
+      spawnAmbient();
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Click anywhere to burst
+    window.addEventListener('pointerdown', (e) => {
+      // Don't trigger if clicking on buttons
+      if (e.target.closest('button, nav, .feature-card')) return;
+      createExplosion(e.clientX, e.clientY, hyperMode ? 60 : 35);
+      playBeep();
+    });
+
+    function triggerBurst(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      createExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2, 40);
+      playChord();
+    }
+
+    // --- 3D Tilt Effect on Card ---
+    const card = document.getElementById('card');
+    document.addEventListener('mousemove', (e) => {
+      const xAxis = (window.innerWidth / 2 - e.pageX) / 35;
+      const yAxis = (window.innerHeight / 2 - e.pageY) / 35;
+      card.style.transform = `rotateY(${xAxis}deg) rotateX(${-yAxis}deg)`;
+    });
+
+    // Reset tilt on leave
+    document.addEventListener('mouseleave', () => {
+      card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    });
+
+    // --- Theme Switcher ---
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        themeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const theme = btn.getAttribute('data-set-theme');
+        document.body.setAttribute('data-theme', theme);
+        createExplosion(window.innerWidth / 2, window.innerHeight / 2, 50);
+        playChord();
+      });
+    });
+
+    function switchRandomTheme() {
+      const themes = ['rainbow', 'cyberpunk', 'sunset', 'aurora', 'electric'];
+      const current = document.body.getAttribute('data-theme');
+      const next = themes.filter(t => t !== current)[Math.floor(Math.random() * (themes.length - 1))];
+      const btn = document.querySelector(`[data-set-theme="${next}"]`);
+      if (btn) btn.click();
+    }
+
+    // --- Hyper Mode ---
+    let hyperMode = false;
+    const hyperBtn = document.getElementById('hyper-toggle');
+    hyperBtn.addEventListener('click', () => {
+      hyperMode = !hyperMode;
+      hyperBtn.classList.toggle('active', hyperMode);
+      document.body.classList.toggle('hyper-shake', hyperMode);
+      
+      if (hyperMode) {
+        hyperBtn.textContent = '🔥 HYPER ON';
+        createExplosion(window.innerWidth / 2, window.innerHeight / 2, 100);
+      } else {
+        hyperBtn.textContent = '⚡ Hyper Mode';
+      }
+      playChord(hyperMode ? 520 : 330);
+    });
+
+    // --- Quotes / Vibe Generator ---
+    const quotes = [
+      "\"Life is either a daring adventure or nothing at all.\" — Helen Keller",
+      "\"Do what you love, love what you do, and give it everything you've got.\"",
+      "\"Don't count the days, make the days count.\" — Muhammad Ali",
+      "\"The biggest risk is not taking any risk at all.\"",
+      "\"Collect moments, not things. Say yes to the adventure!\"",
+      "\"Turn your magic on. Dream big, sparkle more, shine bright.\"",
+      "\"Every moment is a fresh beginning. Send it!\""
+    ];
+
+    const quoteEl = document.getElementById('quote');
+    const vibeBtn = document.getElementById('vibe-btn');
+    vibeBtn.addEventListener('click', () => {
+      quoteEl.style.opacity = 0;
+      quoteEl.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        const nextQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        quoteEl.textContent = nextQuote;
+        quoteEl.style.opacity = 1;
+        quoteEl.style.transform = 'translateY(0)';
+      }, 250);
+
+      const rect = vibeBtn.getBoundingClientRect();
+      createExplosion(rect.left + rect.width / 2, rect.top + rect.height / 2, 30);
+      playChord(440);
+    });
+
+    // Confetti blast button
+    const blastBtn = document.getElementById('blast-btn');
+    blastBtn.addEventListener('click', () => {
+      createExplosion(window.innerWidth * 0.3, window.innerHeight * 0.4, 40);
+      createExplosion(window.innerWidth * 0.7, window.innerHeight * 0.4, 40);
+      createExplosion(window.innerWidth * 0.5, window.innerHeight * 0.3, 50);
+      playChord(587.33);
+    });
+
+    // --- Web Audio Synth Chords ---
+    let audioCtx = null;
+    let isPlayingAudio = false;
+    let synthInterval = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type = 'sine', duration = 0.5, gainVal = 0.15) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playChord(baseFreq = 261.63) {
+      initAudio();
+      const chord = [baseFreq, baseFreq * 1.25, baseFreq * 1.5, baseFreq * 1.875];
+      chord.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'triangle', 0.8, 0.08), idx * 40);
+      });
+    }
+
+    function playBeep() {
+      if (audioCtx) {
+        playTone(400 + Math.random() * 400, 'sine', 0.2, 0.05);
+      }
+    }
+
+    const soundBtn = document.getElementById('sound-btn');
+    const soundBars = document.getElementById('sound-bars');
+    const soundLabel = document.getElementById('sound-label');
+
+    function toggleAudio() {
+      initAudio();
+      isPlayingAudio = !isPlayingAudio;
+      soundBars.classList.toggle('playing', isPlayingAudio);
+
+      if (isPlayingAudio) {
+        soundLabel.textContent = '⏸ Pause Synth';
+        playChordSequence();
+        synthInterval = setInterval(playChordSequence, 2400);
+      } else {
+        soundLabel.textContent = '🎵 Play Synth Chords';
+        clearInterval(synthInterval);
+      }
+    }
+
+    const chordProgression = [261.63, 329.63, 392.00, 349.23, 440.00];
+    let chordIdx = 0;
+    function playChordSequence() {
+      playChord(chordProgression[chordIdx % chordProgression.length]);
+      chordIdx++;
+    }
+
+    soundBtn.addEventListener('click', toggleAudio);
+
+    // Spacebar triggers confetti
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        blastBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
